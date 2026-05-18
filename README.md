@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arc & Circle Swap Hub</title>
+    <title>Jarc Swap</title>
     
     <!-- Official Web3 packages for universal wallet bridging -->
     <script src="https://jsdelivr.net"></script>
