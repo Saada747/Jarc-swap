@@ -366,3 +366,425 @@
     </script>
 </body>
 </html>
+<!-- ======================================================= -->
+<!--   DEX ULTIMATE MODULES: CHART, STAKING & NOTIFICATIONS  -->
+<!-- ======================================================= -->
+
+<style>
+    /* 1. Live Notification Toast Styles */
+    .dex-toast-container {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 2147483647;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .dex-toast {
+        background: #0f1624;
+        border: 1px solid #10b981;
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: #ffffff;
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.8rem;
+        transform: translateX(-120%);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .dex-toast.show { transform: translateX(0); }
+    .toast-pulse { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; }
+
+    /* 2. Chart & Staking Layout Expansion */
+    .dex-extra-grid {
+        max-width: 460px;
+        margin: 20px auto 40px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .extra-card {
+        background: #0f1624;
+        border: 1px solid #1e293b;
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .card-title-hub {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .card-title-hub h4 { margin: 0; font-size: 1rem; color: #ffffff; }
+    
+    /* Mock Price Chart Animation */
+    .mock-chart-container {
+        height: 120px;
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        padding-top: 10px;
+        border-bottom: 1px dashed #1e293b;
+    }
+    .chart-candle {
+        flex: 1;
+        border-radius: 4px;
+        background-color: #10b981;
+        animation: candleGrow 2s ease-in-out infinite alternate;
+    }
+    .chart-candle.bearish { background-color: #ef4444; }
+    @keyframes candleGrow { 
+        0% { height: 30%; } 
+        100% { height: 85%; } 
+    }
+
+    /* Staking Dashboard Core */
+    .stake-row {
+        display: flex;
+        justify-content: space-between;
+        background: #172033;
+        padding: 12px;
+        border-radius: 14px;
+        margin-bottom: 8px;
+        align-items: center;
+        border: 1px solid #1e293b;
+    }
+    .stake-btn {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .stake-btn:hover { background: #2563eb; }
+</style>
+
+<!-- Live Network Toast System Container -->
+<div class="dex-toast-container" id="toast-wrapper"></div>
+
+<!-- Graphical Modules Addition (Chart & Staking) -->
+<div class="dex-extra-grid">
+    <!-- Live Analytics Analytics Panel -->
+    <div class="extra-card">
+        <div class="card-title-hub">
+            <h4>WETH / USDC Live Price Velocity</h4>
+            <span style="color:#10b981; font-weight:bold; font-size:0.8rem;">+4.25%</span>
+        </div>
+        <!-- Mock Animated Interactive Blockchain Chart -->
+        <div class="mock-chart-container">
+            <div class="chart-candle" style="animation-delay: 0.1s;"></div>
+            <div class="chart-candle bearish" style="animation-delay: 0.4s;"></div>
+            <div class="chart-candle" style="animation-delay: 0.2s;"></div>
+            <div class="chart-candle" style="animation-delay: 0.7s;"></div>
+            <div class="chart-candle bearish" style="animation-delay: 0.5s;"></div>
+            <div class="chart-candle" style="animation-delay: 0.9s;"></div>
+            <div class="chart-candle" style="animation-delay: 0.3s;"></div>
+        </div>
+    </div>
+
+    <!-- Yield Staking Management Panel -->
+    <div class="extra-card">
+        <div class="card-title-hub">
+            <h4>Arc Native Staking Vaults</h4>
+            <span style="color:#64748b; font-size:0.75rem;">Liquidity Rewards</span>
+        </div>
+        
+        <!-- Pool Entry 1 -->
+        <div class="stake-row">
+            <div>
+                <div style="font-weight:bold; font-size:0.85rem; color:#fff;">USDC Stable-Vault</div>
+                <div style="font-size:0.7rem; color:#64748b;">APY: <span style="color:#10b981; font-weight:600;">12.4%</span></div>
+            </div>
+            <button class="stake-btn" onclick="triggerStakeAction('USDC')">Deposit</button>
+        </div>
+
+        <!-- Pool Entry 2 -->
+        <div class="stake-row">
+            <div>
+                <div style="font-weight:bold; font-size:0.85rem; color:#fff;">WETH Core-Vault</div>
+                <div style="font-size:0.7rem; color:#64748b;">APY: <span style="color:#10b981; font-weight:600;">18.9%</span></div>
+            </div>
+            <button class="stake-btn" onclick="triggerStakeAction('WETH')">Deposit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Dynamic Liquidity Toast Notification Engine
+    const toastWrapper = document.getElementById('toast-wrapper');
+    const systemNames = ["0x4b...2aef", "0x9c...11fd", "0x1a...88bc", "0x7e...54aa"];
+    const systemTokens = ["5,000 USDC", "10,200 USDT", "2.5 WETH", "1,400 EURC"];
+
+    function displayNetworkToast() {
+        if (!toastWrapper) return;
+        
+        const randomName = systemNames[Math.floor(Math.random() * systemNames.length)];
+        const randomToken = systemTokens[Math.floor(Math.random() * systemTokens.length)];
+        
+        const toastElement = document.createElement('div');
+        toastElement.className = 'dex-toast';
+        toastElement.innerHTML = `
+            <div class="toast-pulse"></div>
+            <div>Wallet <strong>${randomName}</strong> added <strong>${randomToken}</strong> to Liquidity Pool</div>
+        `;
+        
+        toastWrapper.appendChild(toastElement);
+        
+        // Dynamic CSS Animation Activation Frame
+        setTimeout(() => toastElement.classList.add('show'), 100);
+        
+        // Graceful Extraction Sequence
+        setTimeout(() => {
+            toastElement.classList.remove('show');
+            setTimeout(() => toastElement.remove(), 400);
+        }, 4500);
+    }
+
+    // Initialize Infinite Network Loop for Real-time Simulator Environment
+    setInterval(displayNetworkToast, 9000);
+    setTimeout(displayNetworkToast, 2000); // Trigger initial run on load
+
+    // 2. Interactive Yield Staking Logic Connection
+    function triggerStakeAction(vaultName) {
+        if (typeof userWalletAddress !== 'undefined' && userWalletAddress) {
+            alert(`Opening Secure Vault Smart Contract Pipeline for ${vaultName}.\nProcessing secure liquidity delegation on Arc Layer 1 node.`);
+        } else {
+            // Re-route to the custom universal connector if account parameters are absent
+            const universalOverlay = document.getElementById('u-wallet-modal');
+            if (universalOverlay) {
+                universalOverlay.classList.add('active');
+            } else {
+                alert("Please connect your Web3 provider wallet container to unlock staking yield rewards.");
+            }
+        }
+    }
+
+    // 3. Injecting new modules smoothly below the main wrapper node automatically
+    document.addEventListener("DOMContentLoaded", function() {
+        const primaryDexCard = document.querySelector('.dex-wrapper');
+        const extraGridNode = document.querySelector('.dex-extra-grid');
+        if (primaryDexCard && extraGridNode) {
+            // Append the structural nodes neatly inline below the main wrapper workspace
+            primaryDexCard.parentNode.insertBefore(extraGridNode, primaryDexCard.nextSibling);
+        }
+    });
+</script>
+<!-- ======================================================= -->
+<!--   DYNAMIC MULTI-WALLET OVERLAY SYSTEM (ADD TO BOTTOM)   -->
+<!-- ======================================================= -->
+
+<style>
+    /* Professional Multi-Wallet Modal Overlay */
+    .universal-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(5, 8, 16, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 2147483647; /* Ensures it stays on top of everything */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .universal-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .universal-wallet-modal {
+        background-color: #0f1624;
+        border: 1px solid #1e293b;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 400px;
+        padding: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        transform: translateY(20px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .universal-modal-overlay.active .universal-wallet-modal {
+        transform: translateY(0);
+    }
+    .u-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #1e293b;
+        padding-bottom: 12px;
+    }
+    .u-modal-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .u-modal-close {
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-size: 1.6rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .u-modal-close:hover { color: #ffffff; }
+    
+    .u-wallet-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .u-wallet-option {
+        background-color: #172033;
+        border: 1px solid #1e293b;
+        border-radius: 16px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-decoration: none;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .u-wallet-option:hover {
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.08);
+        transform: scale(1.01);
+    }
+    .u-wallet-badge {
+        font-size: 0.7rem;
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        padding: 3px 8px;
+        border-radius: 8px;
+        margin-left: 6px;
+        font-weight: bold;
+    }
+</style>
+
+<!-- Universal Wallet Modal HTML -->
+<div class="universal-modal-overlay" id="u-wallet-modal">
+    <div class="universal-wallet-modal">
+        <div class="u-modal-header">
+            <h4 class="u-modal-title">Select Web3 Provider</h4>
+            <button class="u-modal-close" id="u-modal-close-btn">&times;</button>
+        </div>
+        <div class="u-wallet-grid">
+            <a href="https://tria.so" target="_blank" class="u-wallet-option">
+                <span>🔮 Tria Wallet <span class="u-wallet-badge">Arc Native</span></span>
+                <span>Connect</span>
+            </a>
+            <a href="https://app.link" target="_blank" class="u-wallet-option" id="u-meta-link">
+                <span>🦊 MetaMask Wallet</span>
+                <span>Connect</span>
+            </a>
+            <a href="https://trustwallet.com" target="_blank" class="u-wallet-option">
+                <span>🛡️ Trust Wallet</span>
+                <span>Connect</span>
+            </a>
+            <a href="https://phantom.app" target="_blank" class="u-wallet-option">
+                <span>👻 Phantom Wallet</span>
+                <span>Connect</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Overriding the previous basic connection errors with an elegant visual hub
+    document.addEventListener("DOMContentLoaded", function() {
+        const walletButton = document.getElementById('wallet-trigger');
+        const modalOverlay = document.getElementById('u-wallet-modal');
+        const modalCloseBtn = document.getElementById('u-modal-close-btn');
+        const tokenSelectFrom = document.getElementById('select-from');
+        const tokenSelectTo = document.getElementById('select-to');
+
+        // 1. Upgrade Token Selectors to natively include WETH choice parameters
+        if (tokenSelectFrom && !tokenSelectFrom.querySelector('option[value="WETH"]')) {
+            const wethOpt = document.createElement('option');
+            wethOpt.value = 'WETH';
+            wethOpt.text = 'WETH';
+            tokenSelectFrom.add(wethOpt, tokenSelectFrom.options[0]);
+        }
+        if (tokenSelectTo && !tokenSelectTo.querySelector('option[value="WETH"]')) {
+            const wethOpt = document.createElement('option');
+            wethOpt.value = 'WETH';
+            wethOpt.text = 'WETH';
+            tokenSelectTo.add(wethOpt);
+        }
+
+        // Dynamically adjust internal mock index prices to accommodate WETH asset valuation
+        if (typeof marketPrices !== 'undefined') {
+            marketPrices.WETH = 3250.00;
+        }
+
+        // 2. Intercept the crash alerts and inject the custom universal layout modal
+        if (walletButton) {
+            // Clone the button to wipe out previous alert event listeners entirely
+            const upgradedButton = walletButton.cloneNode(true);
+            walletButton.parentNode.replaceChild(upgradedButton, walletButton);
+
+            upgradedButton.addEventListener('click', async function(e) {
+                e.preventDefault();
+                
+                // Check if an injected Web3 extension (like MetaMask) actually exists in current environment
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        upgradedButton.innerText = "Connecting...";
+                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        const userAddress = accounts[0];
+                        
+                        upgradedButton.innerText = userAddress.substring(0,6) + "..." + userAddress.substring(38);
+                        upgradedButton.style.borderColor = "#10b981";
+                        upgradedButton.style.color = "#10b981";
+                        
+                        const actionBtn = document.getElementById('action-trigger');
+                        if (actionBtn) {
+                            actionBtn.disabled = false;
+                            actionBtn.innerText = "Swap Assets";
+                        }
+                        
+                        const fromBalElement = document.getElementById('balance-from');
+                        if (fromBalElement) fromBalElement.innerText = "Fetch Active";
+                        
+                    } catch (error) {
+                        upgradedButton.innerText = "Connect Wallet";
+                        console.log("Connection closed by browser profile.");
+                    }
+                } else {
+                    // No web3 provider detected (Standard Mobile Browser) -> Open the custom modal cleanly
+                    modalOverlay.classList.add('active');
+                }
+            });
+        }
+
+        // Close Custom Modal operations
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
+        }
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+        });
+
+        // 3. Dynamic Deep-linking resolution logic for mobile networks
+        const currentDomainUrl = window.location.href;
+        const metaLinkElement = document.getElementById('u-meta-link');
+        if (metaLinkElement) {
+            metaLinkElement.href = `https://app.link{currentDomainUrl.replace('https://', '')}`;
+        }
+    });
+</script>
