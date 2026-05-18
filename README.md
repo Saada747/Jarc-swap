@@ -435,19 +435,3 @@
             receiptDisplay.style.display = 'block';
         }
 
-        // Live Toasts loop 
-        setInterval(() => {
-            const toastWrapper = document.getElementById('toast-wrapper');
-            if(!toastWrapper) return;
-            const toast = document.createElement('div');
-            toast.className = 'dex-toast';
-            toast.innerHTML = `<div class="toast-pulse"></div><div>Pool updated with fresh stablecoin liquidity.</div>`;
-            toastWrapper.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
-        }, 10000);
-
-        calculateSwapOutputs();
-    </script>
-</body>
-</html>
